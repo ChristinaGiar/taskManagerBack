@@ -21,6 +21,7 @@ app.use((error, req, res, next) => {
   res.status(status).json({ message: message });
 });
 
-app.listen(process.env.PORT || 8080, function() {
-    console.log("Listening to 8080");
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, function() {
+    console.log("Listening to " + PORT);
 });
