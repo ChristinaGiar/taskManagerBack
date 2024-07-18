@@ -1,54 +1,86 @@
-const express = require('express');
+const express = require('express')
+const { KEY } = require('../utils/constants')
+const jwt = require('jsonwebtoken')
 
-const router = express.Router();
-const { getUser, addUser } = require('../data/data');
-const { createJWToken } = require('../utils/token');
+const router = express.Router()
+const {
+  getUser,
+  addUser,
+  changeUserData,
+  checkPassword,
+} = require('../data/data')
+const { createJWToken, createJWEmailToken } = require('../utils/token')
 
 router.post('/signup', async (req, res) => {
-    const email = req.body.email;
-    const password = req.body.password;
-    const name = req.body.name;
-    const serverErrors = {};
+  const email = req.body.email
+  const password = req.body.password
+  const name = req.body.name
+  const serverErrors = {}
 
-    const existingUser = await getUser({ email, password });
-    if (existingUser) {
-        serverErrors.email = 'Email already exists. ';
-    }
+  const existingUser = await getUser(email)
+  if (existingUser) {
+    serverErrors.email = 'Email already exists. '
+  }
 
-    if (password.length < 8) {
-        serverErrors.password = 'Password must be at least 8 characters long. ';
-    }
+  if (Object.keys(serverErrors).length > 0) {
+    return res.status(422).json({ serverErrors: serverErrors })
+  }
 
-    if (Object.keys(serverErrors).length > 0) {
-        return res.status(422)
-            .json({ serverErrors: serverErrors });
-    }
+  try {
+    const newUser = await addUser({ email, password, name, isVerified: false })
+    const authToken = createJWEmailToken(email)
 
-    try {
-        const newUser = await addUser({ email, password, name });
-        const authToken = createJWToken(email);
-        res.status(201)
-            .json({ message: 'User created. ', user: newUser, token: authToken })
-    } catch (error) {
-
-    }
+    res.status(201).json({
+      message: 'User created. ',
+      user: { ...newUser },
+      // token: authToken,
+      emailURL: `http://localhost:3000/verify?token=${authToken}`,
+    })
+  } catch (error) {}
 })
 
 router.post('/login', async (req, res) => {
-    const email = req.body.email;
-    const password = req.body.password;
+  const email = req.body.email
+  const password = req.body.password
+  let result
 
-    const user = await getUser({ email, password });
-    if (!user) {
-        return res.status(422).json({
-            message: 'Invalid credentials. ',
-            serverError: 'Invalid email or password'
-        })
-    }
+  const user = await getUser(email)
+  if (user) {
+    result = (await checkPassword(password, user.password)) ? user : null
+  }
+  if (!user || !result) {
+    return res.status(422).json({
+      serverError: {
+        noMatch: 'Invalid email or password',
+      },
+    })
+  }
 
-    const token = createJWToken(email);
-    res.json({ token, "user": { "name": user.name } });
-
+  const token = createJWToken(email)
+  console.log(token)
+  res.json({ token, user: { name: user.name, isVerified: user.isVerified } })
 })
 
-module.exports = router;
+// https://yourapp.com/verify?token=your-generated-jwt-token
+router.get('/verify', (req, res) => {
+  const token = decodeURI(req.query.token)
+  const EMAIL_KEY = 'KE34Ffsvb9gU5eL2'
+
+  jwt.verify(token, EMAIL_KEY, async (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ message: 'Token invalid or expired' })
+    }
+    const user = await getUser(decoded.email)
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' })
+    }
+    if (user.isVerified) {
+      return res.status(403).json({ message: 'The user is already verified' })
+    }
+    await changeUserData({ ...user, isVerified: true })
+
+    return res.status(200).json({ isVerified: true })
+  })
+})
+
+module.exports = router

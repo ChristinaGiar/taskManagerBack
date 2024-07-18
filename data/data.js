@@ -1,50 +1,81 @@
-const fs = require('node:fs/promises');
-const { hash, compare } = require('bcryptjs');
-const { v4: id} = require('uuid');
-var path = require('path');
-const pathRoot = path.resolve(__dirname);
+const fs = require('node:fs/promises')
+const { hash, compare } = require('bcryptjs')
+const { v4: id } = require('uuid')
+var path = require('path')
+const pathRoot = path.resolve(__dirname)
 
 async function addUser(data) {
-    const storedUsers = await readData();
-    const hashPass = await hash(data.password, 10);
-    const userId = id();
+  const storedUsers = await readData()
+  const hashPass = await hash(data.password, 10)
+  const userId = id()
 
-    if(!storedUsers.users) {
-        storedUsers.users = [];
-    }
+  if (!storedUsers.users) {
+    storedUsers.users = []
+  }
 
-    storedUsers.users.push({ ...data, password: hashPass, id: userId, name: data.name});
-    await writeData(storedUsers);
-    return{ id: userId, email: data.email, name: data.name}
+  storedUsers.users.push({
+    ...data,
+    password: hashPass,
+    id: userId,
+    name: data.name,
+    isVerified: false,
+  })
+  await writeData(storedUsers)
+  return { id: userId, email: data.email, name: data.name }
 }
 
-async function getUser(data) {
-    const storedUsers = await readData();
-    if(!storedUsers.users || storedUsers.users.length === 0) {
-        return null;
-    }
-    const user = storedUsers.users.find(user => user.email === data.email);
-    if(!user) {
-        return;
-    }
-    const result = await checkPassword(data.password, user.password) ? user : null;
-    return result;
+async function getUser(email) {
+  const storedUsers = await readData()
+  if (!storedUsers.users || storedUsers.users.length === 0) {
+    return null
+  }
+  const user = storedUsers.users.find((user) => user.email === email)
+  if (!user) {
+    // !!!NEW CAUTION!!!
+    return null
+  }
+  return user
+}
+
+async function changeUserData(user) {
+  const storedUsers = await readData()
+
+  const changedUsers = {
+    users: [
+      ...storedUsers.users.filter(
+        (storedUser) => storedUser.email !== user.email
+      ),
+      user,
+    ],
+  }
+  console.log('changedUsers', changedUsers.users)
+  await writeData(changedUsers)
 }
 
 async function checkPassword(enteredPass, DBpassword) {
-    const validPass = await compare(enteredPass, DBpassword);
-    return !!validPass;
+  const validPass = await compare(enteredPass, DBpassword)
+  return !!validPass
 }
 
-
 async function readData() {
-    const data = await fs.readFile(path.join(pathRoot, '..', 'users.json'), { encoding: 'utf8' });
-    return JSON.parse(data);
+  const data = await fs.readFile(path.join(pathRoot, '..', 'users.json'), {
+    encoding: 'utf8',
+  })
+  return JSON.parse(data)
 }
 
 async function writeData(newData) {
-    await fs.writeFile(path.join(pathRoot, '..', 'users.json'), JSON.stringify(newData));
+  try {
+    await fs.writeFile(
+      path.join(pathRoot, '..', 'users.json'),
+      JSON.stringify(newData)
+    )
+  } catch (error) {
+    console.log(error)
+  }
 }
 
-exports.addUser = addUser;
-exports.getUser = getUser;
+exports.addUser = addUser
+exports.getUser = getUser
+exports.changeUserData = changeUserData
+exports.checkPassword = checkPassword
