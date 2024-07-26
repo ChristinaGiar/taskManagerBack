@@ -68,14 +68,16 @@ router.get('/verify', (req, res) => {
 
   jwt.verify(token, EMAIL_KEY, async (err, decoded) => {
     if (err) {
-      return res.status(401).json({ message: 'Token invalid or expired' })
+      console.log(err)
+      return res
+        .status(400)
+        .json({ isVerified: false, message: 'Token invalid or expired' })
     }
     const user = await getUser(decoded.email)
     if (!user) {
-      return res.status(401).json({ message: 'User not found' })
-    }
-    if (user.isVerified) {
-      return res.status(403).json({ message: 'The user is already verified' })
+      return res
+        .status(401)
+        .json({ isVerified: false, message: 'User not found' })
     }
     await changeUserData({ ...user, isVerified: true })
 

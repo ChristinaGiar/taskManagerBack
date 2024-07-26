@@ -1,12 +1,13 @@
 const fs = require('node:fs/promises')
-const { hash, compare } = require('bcryptjs')
+const { hash, compare, genSalt } = require('bcryptjs')
 const { v4: id } = require('uuid')
 var path = require('path')
 const pathRoot = path.resolve(__dirname)
 
 async function addUser(data) {
   const storedUsers = await readData()
-  const hashPass = await hash(data.password, 10)
+  const salt = await genSalt(10)
+  const hashPass = await hash(data.password, salt)
   const userId = id()
 
   if (!storedUsers.users) {
@@ -48,7 +49,6 @@ async function changeUserData(user) {
       user,
     ],
   }
-  console.log('changedUsers', changedUsers.users)
   await writeData(changedUsers)
 }
 
