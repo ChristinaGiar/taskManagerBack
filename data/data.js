@@ -1,55 +1,50 @@
 const fs = require('node:fs/promises')
 const { hash, compare, genSalt } = require('bcryptjs')
 const { v4: id } = require('uuid')
+const { CredentialModel } = require('../utils/mongoSetUp')
 var path = require('path')
 const pathRoot = path.resolve(__dirname)
 
 async function addUser(data) {
-  const storedUsers = await readData()
   const salt = await genSalt(10)
   const hashPass = await hash(data.password, salt)
   const userId = id()
 
-  if (!storedUsers.users) {
-    storedUsers.users = []
-  }
-
-  storedUsers.users.push({
+  const credData = new CredentialModel({
     ...data,
     password: hashPass,
     id: userId,
-    name: data.name,
-    isVerified: false,
   })
-  await writeData(storedUsers)
+
+  credData
+    .save()
+    .then((doc) => {
+      console.log('Credential document saved:', doc)
+    })
+    .catch((error) => {
+      console.error('Error saving credential document:', error)
+    })
   return { id: userId, email: data.email, name: data.name }
 }
 
 async function getUser(email) {
-  const storedUsers = await readData()
-  if (!storedUsers.users || storedUsers.users.length === 0) {
-    return null
-  }
-  const user = storedUsers.users.find((user) => user.email === email)
+  const user = await CredentialModel.findOne({ email }).lean()
+
   if (!user) {
-    // !!!NEW CAUTION!!!
     return null
   }
   return user
 }
 
-async function changeUserData(user) {
-  const storedUsers = await readData()
+async function changeUserData(userData) {
+  const user = await CredentialModel.findOne({
+    email: userData.email,
+  })
 
-  const changedUsers = {
-    users: [
-      ...storedUsers.users.filter(
-        (storedUser) => storedUser.email !== user.email
-      ),
-      user,
-    ],
+  if (user) {
+    user.overwrite({ ...userData })
+    await user.save()
   }
-  await writeData(changedUsers)
 }
 
 async function checkPassword(enteredPass, DBpassword) {
