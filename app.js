@@ -4,7 +4,8 @@ const cors = require('cors')
 const dotenv = require('dotenv')
 
 const authRoutes = require('./routes/auth')
-const { connection } = require('./utils/mongoSetUp')
+const dbRoutes = require('./routes/db')
+const { connection } = require('./utils/dbSetUp')
 
 dotenv.config()
 
@@ -22,6 +23,7 @@ app.use((req, res, next) => {
 })
 
 app.use(authRoutes)
+app.use(dbRoutes)
 
 app.use((error, req, res, next) => {
   const status = error.status || 500
@@ -36,6 +38,6 @@ app.listen(PORT, async () => {
     await connection
     console.log('Connected to MongoDB')
   } catch (error) {
-    console.log('MongoDB has not been connected')
+    console.log('MongoDB has not been connected', error)
   }
 })

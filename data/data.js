@@ -1,7 +1,7 @@
 const fs = require('node:fs/promises')
 const { hash, compare, genSalt } = require('bcryptjs')
 const { v4: id } = require('uuid')
-const { CredentialModel } = require('../utils/mongoSetUp')
+const { CredentialModel } = require('../utils/dbSetUp')
 var path = require('path')
 const pathRoot = path.resolve(__dirname)
 

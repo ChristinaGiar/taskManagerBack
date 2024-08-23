@@ -4,13 +4,26 @@ require('dotenv').config()
 let connection = mongoose.connect(process.env.MONGO_URL)
 
 const credentialSchema = new mongoose.Schema({
+  id: String,
   name: String,
   email: String,
   password: String,
-  id: String,
   isVerified: Boolean,
 })
 
 const CredentialModel = mongoose.model('Credential', credentialSchema)
 
-module.exports = { connection, CredentialModel }
+const userActivitySchema = new mongoose.Schema({
+  id: String,
+  items: Array,
+  statuses: Array,
+})
+
+const UserActivityModel = mongoose.model('UserActivity', userActivitySchema)
+
+module.exports = {
+  connection,
+  CredentialModel,
+  UserActivityModel,
+  credentialSchema,
+}

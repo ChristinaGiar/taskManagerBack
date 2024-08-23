@@ -58,7 +58,10 @@ router.post('/login', async (req, res) => {
 
   const token = createJWToken(email)
   console.log(token)
-  res.json({ token, user: { name: user.name, isVerified: user.isVerified } })
+  res.json({
+    token,
+    user: { name: user.name, isVerified: user.isVerified, id: user.id },
+  })
 })
 
 // https://yourapp.com/verify?token=your-generated-jwt-token
