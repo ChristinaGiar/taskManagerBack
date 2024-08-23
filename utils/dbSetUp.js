@@ -17,6 +17,7 @@ const userActivitySchema = new mongoose.Schema({
   id: String,
   items: Array,
   statuses: Array,
+  themeColor: Object,
 })
 
 const UserActivityModel = mongoose.model('UserActivity', userActivitySchema)
