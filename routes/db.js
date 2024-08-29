@@ -23,7 +23,6 @@ router.post('/saveUserActivity', async (req, res) => {
       })
       await userActivityData.save()
     }
-    console.log('User activity saved')
   } catch (error) {
     console.log('Error with User Activity collection', error)
   }

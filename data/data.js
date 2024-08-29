@@ -19,7 +19,7 @@ async function addUser(data) {
   credData
     .save()
     .then((doc) => {
-      console.log('Credential document saved:', doc)
+      console.log('Credential document saved')
     })
     .catch((error) => {
       console.error('Error saving credential document:', error)
