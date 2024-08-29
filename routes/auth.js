@@ -34,7 +34,7 @@ router.post('/signup', async (req, res) => {
       message: 'User created. ',
       user: { ...newUser },
       // token: authToken,
-      emailURL: `http://localhost:3000/verify?token=${authToken}`,
+      emailURL: `${process.env.FRONTEND_URL}/verify?token=${authToken}`,
     })
   } catch (error) {}
 })
