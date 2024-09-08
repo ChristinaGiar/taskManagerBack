@@ -4,3 +4,5 @@ users.json
 
 .env
 .env.production
+
+access.log

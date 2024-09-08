@@ -40,13 +40,13 @@ app.use((error, req, res, next) => {
   res.status(status).json({ message: message })
 })
 
-const PORT = process.env.PORT || 8080
-app.listen(PORT, async () => {
-  console.log('Listening to ' + PORT)
-  try {
-    await connection
+connection
+  .then(() => {
     console.log('Connected to MongoDB')
-  } catch (error) {
-    console.log('MongoDB has not been connected', error)
-  }
-})
+    const PORT = process.env.PORT || 8080
+    app.listen(PORT)
+    console.log('Listening to ' + PORT)
+  })
+  .catch((error) => {
+    console.log(error)
+  })
