@@ -3,6 +3,9 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const dotenv = require('dotenv')
 const helmet = require('helmet')
+const fs = require('fs')
+const path = require('path')
+const morgan = require('morgan')
 const authRoutes = require('./routes/auth')
 const dbRoutes = require('./routes/db')
 const { connection } = require('./utils/dbSetUp')
@@ -13,7 +16,12 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
+const accessLogStream = fs.createWriteStream(
+  path.join(__dirname, 'access.log'),
+  { flags: 'a' }
+)
 app.use(helmet())
+app.use(morgan('combined', { stream: accessLogStream }))
 app.use(bodyParser.json())
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*')

@@ -57,7 +57,6 @@ router.post('/login', async (req, res) => {
   }
 
   const token = createJWToken(email)
-  console.log(token)
   res.json({
     token,
     user: { name: user.name, isVerified: user.isVerified, id: user.id },
@@ -71,7 +70,7 @@ router.get('/verify', (req, res) => {
 
   jwt.verify(token, EMAIL_KEY, async (err, decoded) => {
     if (err) {
-      console.log(err)
+      // console.log(err)
       return res
         .status(400)
         .json({ isVerified: false, message: 'Token invalid or expired' })
