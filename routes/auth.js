@@ -62,7 +62,7 @@ router.post('/login', async (req, res, next) => {
     }
 
     const token = createJWToken(email)
-    res.json({
+    res.status(200).json({
       token,
       user: {
         name: user.name,

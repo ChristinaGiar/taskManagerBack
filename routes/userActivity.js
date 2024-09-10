@@ -8,7 +8,9 @@ router.get('/getUserActivity', async (req, res, next) => {
     const userActivity = await UserActivityModel.findOne({
       userId: userId,
     }).lean()
+
     return res.status(200).json({
+      message: "User's activity fetched.",
       userActivity: userActivity || null,
     })
   } catch (err) {
@@ -38,6 +40,8 @@ router.post('/saveUserActivity', async (req, res, next) => {
       })
       await newUserActivity.save()
     }
+
+    return res.status(200).json({ message: "User's activity saved." })
   } catch (err) {
     if (!err.status) {
       err.status = 500
