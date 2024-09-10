@@ -19,7 +19,7 @@ router.get('/getUserActivity', async (req, res, next) => {
   }
 })
 
-router.post('/saveUserActivity', async (req, res) => {
+router.post('/saveUserActivity', async (req, res, next) => {
   const { userId, items, statuses, themeColor } = req.body
   try {
     const userActivity = await UserActivityModel.findOne({ userId: userId })

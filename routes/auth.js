@@ -11,7 +11,7 @@ const {
 } = require('../data/data')
 const { createJWToken, createJWEmailToken } = require('../utils/token')
 
-router.post('/signup', async (req, res) => {
+router.post('/signup', async (req, res, next) => {
   const email = req.body.email
   const password = req.body.password
   const name = req.body.name
@@ -43,7 +43,7 @@ router.post('/signup', async (req, res) => {
   }
 })
 
-router.post('/login', async (req, res) => {
+router.post('/login', async (req, res, next) => {
   const email = req.body.email
   const password = req.body.password
   let result
@@ -79,7 +79,7 @@ router.post('/login', async (req, res) => {
 })
 
 // https://yourapp.com/verify?token=your-generated-jwt-token
-router.get('/verify', (req, res) => {
+router.get('/verify', (req, res, next) => {
   const token = decodeURI(req.query.token)
   const EMAIL_KEY = 'KE34Ffsvb9gU5eL2'
 
