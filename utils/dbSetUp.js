@@ -4,20 +4,22 @@ require('dotenv').config()
 let connection = mongoose.connect(process.env.MONGO_URL)
 
 const credentialSchema = new mongoose.Schema({
-  id: String,
   name: String,
   email: String,
   password: String,
   isVerified: Boolean,
 })
 
-const CredentialModel = mongoose.model('Credential', credentialSchema)
+const CredentialModel = mongoose.model('Credentials', credentialSchema)
 
 const userActivitySchema = new mongoose.Schema({
-  id: String,
   items: Array,
   statuses: Array,
   themeColor: Object,
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Credentials',
+  },
 })
 
 const UserActivityModel = mongoose.model('UserActivity', userActivitySchema)

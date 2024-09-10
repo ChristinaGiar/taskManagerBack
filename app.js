@@ -7,7 +7,7 @@ const fs = require('fs')
 const path = require('path')
 const morgan = require('morgan')
 const authRoutes = require('./routes/auth')
-const dbRoutes = require('./routes/db')
+const userActivityRoutes = require('./routes/userActivity')
 const { connection } = require('./utils/dbSetUp')
 
 dotenv.config()
@@ -32,7 +32,7 @@ app.use((req, res, next) => {
 })
 
 app.use(authRoutes)
-app.use(dbRoutes)
+app.use(userActivityRoutes)
 
 app.use((error, req, res, next) => {
   const status = error.status || 500

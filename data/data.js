@@ -24,7 +24,7 @@ async function addUser(data) {
     .catch((error) => {
       console.error('Error saving credential document:', error)
     })
-  return { id: userId, email: data.email, name: data.name }
+  return { id: credData._id.toString(), email: data.email, name: data.name }
 }
 
 async function getUser(email) {
